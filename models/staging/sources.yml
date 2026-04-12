@@ -2,7 +2,7 @@ sources:
   - name: raw
     schema: main
     tables:
-      - name: motor_vehicle_collisions
+      - name: collisions
         meta:
           external_location: "read_csv_auto('data/Motor_Vehicle_Collisions_-_Crashes_20260411.csv')"
         columns:
