@@ -1,0 +1,20 @@
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: motor_vehicle_collisions
+        meta:
+          external_location: "read_csv_auto('data/Motor_Vehicle_Collisions_-_Crashes_20260411.csv')"
+        columns:
+          - name: COLLISION_ID
+            description: "Row identifier for the collision record"
+          - name: CRASH DATE
+            description: "Date of the collision"
+          - name: CRASH TIME
+            description: "Time of the collision"
+          - name: LATITUDE
+            description: "Latitude of the collision location"
+          - name: LONGITUDE
+            description: "Longitude of the collision location"
+          - name: BOROUGH
+            description: "Borough where the collision occurred"

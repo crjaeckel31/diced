@@ -4,3 +4,6 @@ dbt_packages/
 logs/
 .planning/
 docs/
+data/
+*.duckdb
+.DS_Store
