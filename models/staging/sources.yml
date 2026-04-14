@@ -18,3 +18,25 @@ sources:
             description: "Longitude of the collision location"
           - name: BOROUGH
             description: "Borough where the collision occurred"
+      - name: street_segments
+        meta:
+          external_location: "ST_Read('data/cscl/geo_export_df9eebea-0e57-4ca2-91e4-9507e8a8e1b4.shp')"
+        columns:
+            - name: physicalid
+              description: "Unique street segment identifier"
+            - name: geom
+              description: "Linestring geometry of the segment"
+            - name: rw_type
+              description: "Roadway type/classification"
+            - name: number_tra
+              description: "Number of travel lanes"
+            - name: posted_spe
+              description: "Posted speed limit"
+            - name: trafdir
+              description: "Traffic direction (T=two-way, A/W=one-way)"
+            - name: full_stree
+              description: "Full street name"
+            - name: boroughcod
+              description: "Borough code"
+            - name: bike_lane
+              description: "Bike lane type"
