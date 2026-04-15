@@ -40,3 +40,19 @@ sources:
               description: "Borough code"
             - name: bike_lane
               description: "Bike lane type"
+      - name: pavement_ratings
+        meta:
+          external_location: "read_csv_auto('data/Street_Pavement_Ratings_20260415.csv')"
+        columns:
+          - name: the_geom
+            description: "MULTILINESTRING geometry of the rated street segment"
+          - name: OFTCode
+            description: "LION On-From-To street code"
+          - name: SystemRating
+            description: "Pavement condition score (1-10 scale, 0 = unrated)"
+          - name: NonRatingReason
+            description: "Reason segment was not rated"
+          - name: BoroughName
+          - name: OnStreetName
+          - name: Road_Type
+          - name: InspectionTime
