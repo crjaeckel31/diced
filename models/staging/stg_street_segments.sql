@@ -41,18 +41,18 @@ renamed as (
             when 5 then 'staten_island'
         end as borough,
         case bike_lane::integer
-            when 1 then 'class_i'
-            when 2 then 'class_ii'
-            when 3 then 'class_iii'
-            when 4 then 'links'
-            when 5 then 'class_i_ii'
-            when 6 then 'class_ii_iii'
-            when 7 then 'stairs'
-            when 8 then 'class_i_iii'                                                                                                                                      
-            when 9 then 'class_ii_i'
-            when 10 then 'class_iii_i'                                                                                                                                     
-            when 11 then 'class_iii_ii' 
-            else null                                                                                                                                                      
+            when 1  then 'protected'
+            when 2  then 'painted'
+            when 3  then 'sharrow'
+            when 4  then 'link'
+            when 5  then 'protected_and_painted'
+            when 6  then 'painted_and_sharrow'
+            when 7  then 'stairs'
+            when 8  then 'protected_and_sharrow'
+            when 9  then 'painted_and_protected'
+            when 10 then 'sharrow_and_protected'
+            when 11 then 'sharrow_and_painted'
+            else null
         end as bike_lane
     from source
     where physicalid is not null
