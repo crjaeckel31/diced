@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: stg_collisions
+    description: Raw NYC motor vehicle crash data, sanitized. One row per crash with coordinates, contributing factors, and casualty counts. Filtered to geocoded records only.
+    columns:
+      - name: collision_id
+        description: Unique crash identifier from NYC Open Data.
+        tests:
+          - unique
+          - not_null
+      - name: crash_date
+        tests:
+          - not_null
+      - name: crash_time
+        tests:
+          - not_null
+      - name: lat
+        description: Crash latitude. Null records filtered at source.
+        tests:
+          - not_null
+      - name: lon
+        description: Crash longitude. Null records filtered at source.
+        tests:
+          - not_null
+      - name: borough
+        description: Self-reported borough from the crash report. Sparse — do not use as a reliable grouping field.
+      - name: factor_1
+        description: Contributing factor for vehicle 1.
+      - name: factor_2
+        description: Contributing factor for vehicle 2.
+      - name: factor_3
+        description: Contributing factor for vehicle 3.
+      - name: factor_4
+        description: Contributing factor for vehicle 4.
+      - name: factor_5
+        description: Contributing factor for vehicle 5.
+      - name: persons_injured
+        tests:
+          - not_null
+      - name: persons_killed
+        tests:
+          - not_null
+
+  - name: stg_street_segments
+    description: NYC Centerline (CSCL) street segments with road characteristics made legible. One row per physical segment. Coded fields decoded to readable values.
+    columns:
+      - name: segment_id
+        description: Physical segment identifier (physicalid in CSCL source).
+        tests:
+          - unique
+          - not_null
+      - name: geom
+        description: Segment geometry in WGS84. Used for spatial joins in intermediate layer.
+      - name: roadway_type
+        description: Decoded road class (street, highway, bridge, tunnel, ramp, etc.).
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['street', 'highway', 'bridge', 'tunnel', 'boardwalk', 'path_trail', 'step_street', 'driveway', 'ramp', 'alley', 'unknown', 'non_physical', 'u_turn', 'ferry_route']
+      - name: number_of_travel_lanes
+        description: Number of travel lanes on the segment.
+      - name: speed_limit
+        description: Posted speed limit in mph.
+      - name: one_way
+        description: True if the segment is one-way, false if two-way, null if non-vehicular.
+      - name: full_street_name
+        description: Full street name as recorded in CSCL.
+      - name: borough
+        description: Borough decoded from CSCL borough code.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['manhattan', 'bronx', 'brooklyn', 'queens', 'staten_island']
+      - name: bike_lane
+        description: NYC DOT bike lane classification. Null means no bike lane on this segment.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['protected', 'painted', 'sharrow', 'link', 'protected_and_painted', 'painted_and_sharrow', 'stairs', 'protected_and_sharrow', 'painted_and_protected', 'sharrow_and_protected', 'sharrow_and_painted']
