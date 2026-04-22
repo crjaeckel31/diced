@@ -1,0 +1,108 @@
+version: 2
+
+models:
+  - name: dim_street_segments
+    description: One row per driveable NYC Centerline street segment. Filtered to roadway types where vehicles are expected. Primary dimension for joining crash and road attribute data.
+    columns:
+      - name: segment_id
+        description: Unique segment identifier. PK.
+        tests:
+          - unique
+          - not_null
+      - name: roadway_type
+        description: Road class. Filtered to street, highway, ramp, alley, driveway.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['street', 'highway', 'ramp', 'alley', 'driveway']
+      - name: geom
+        description: Segment geometry in WGS84.
+      - name: number_of_travel_lanes
+        description: Number of travel lanes on the segment.
+      - name: speed_limit
+        description: Posted speed limit in mph.
+      - name: one_way
+        description: True if one-way, false if two-way, null if non-vehicular.
+      - name: full_street_name
+        description: Full street name as recorded in CSCL.
+        tests:
+          - not_null
+      - name: borough
+        description: Borough the segment belongs to.
+      - name: bike_lane
+        description: NYC DOT bike lane classification. Null means no bike lane.
+
+  - name: dim_intersections
+    description: One row per street intersection derived by clustering CSCL segment endpoints. Dead ends (single street name) are excluded. Grain is (lon, lat) with at least two distinct street names.
+    columns:
+      - name: intersection_id
+        description: Synthetic PK derived from MD5 of lon and lat.
+        tests:
+          - unique
+          - not_null
+      - name: lon
+        description: Longitude of the intersection point.
+        tests:
+          - not_null
+      - name: lat
+        description: Latitude of the intersection point.
+        tests:
+          - not_null
+      - name: borough
+        description: Borough the intersection belongs to.
+      - name: street_names
+        description: List of distinct street names meeting at this intersection.
+        tests:
+          - not_null
+
+  - name: fct_crashes_enriched
+    description: One row per geocoded crash joined to its nearest street segment. The primary crash fact table. Crashes without a matching segment are excluded.
+    columns:
+      - name: collision_id
+        description: Unique crash identifier. PK.
+        tests:
+          - unique
+          - not_null
+      - name: crash_date
+        tests:
+          - not_null
+      - name: crash_time
+        tests:
+          - not_null
+      - name: crash_point
+        description: Crash location as a WGS84 point geometry.
+        tests:
+          - not_null
+      - name: segment_id
+        description: FK to dim_street_segments. The nearest driveable segment to the crash.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_street_segments')
+                field: segment_id
+      - name: persons_injured
+        description: Total number of persons injured in the crash.
+        tests:
+          - not_null
+      - name: persons_killed
+        description: Total number of persons killed in the crash.
+        tests:
+          - not_null
+
+  - name: fct_crash_factors
+    description: Junction table linking crashes to contributing factors. One row per (collision, factor) pair. DISTINCT enforces the grain — per-vehicle duplicates from the source are collapsed.
+    columns:
+      - name: collision_id
+        description: FK to stg_collisions. Not all crashes in this table are geocoded — use fct_crashes_enriched for crash-segment joins.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_collisions')
+                field: collision_id
+      - name: contributing_factor
+        description: A single contributing factor cited for this crash.
+        tests:
+          - not_null
