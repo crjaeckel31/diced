@@ -60,3 +60,4 @@ renamed as (
 
 select *
 from renamed
+qualify row_number() over (partition by segment_id order by segment_id) = 1
