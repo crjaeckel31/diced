@@ -15,6 +15,8 @@
       from endpoints
       group by ST_X(pt), ST_Y(pt)
       having count(distinct full_street_name) >= 2   -- drops dead ends
+          and ST_X(pt) is not null
+          and ST_Y(pt) is not null
   ),
 
   final as (
