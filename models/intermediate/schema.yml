@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_collisions_geocoded
+    description: Links each crash to its nearest driveable NYC Centerline street segment. One row per geocoded crash. Crashes with no segment within ~100m are excluded.
+    columns:
+      - name: collision_id
+        description: FK to stg_collisions.
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_collisions')
+                field: collision_id
+      - name: crash_point
+        description: Crash location as a WGS84 point geometry derived from lat/lon.
+        tests:
+          - not_null
+      - name: segment_id
+        description: FK to stg_street_segments. The nearest driveable segment to the crash point.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_street_segments')
+                field: segment_id
+      - name: roadway_type
+        description: Road class of the matched segment. Denormalized from stg_street_segments for convenience.
+
+  - name: int_crash_factors_unpivoted
+    description: Unpivots the five per-vehicle contributing factor columns into one row per (collision, factor). Nulls and Unspecified values are excluded. Grain is collision_id x contributing_factor.
+    columns:
+      - name: collision_id
+        description: FK to stg_collisions.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_collisions')
+                field: collision_id
+      - name: contributing_factor
+        description: A single contributing factor cited for this crash.
+        tests:
+          - not_null
