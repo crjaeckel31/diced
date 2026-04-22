@@ -1,0 +1,95 @@
+version: 2
+
+models:
+  - name: rpt_factor_contributions
+    description: >
+      Ranks contributing factors by crash rate elevation per road attribute value.
+      One row per (attribute_name, attribute_value, contributing_factor).
+      Rate-ratio compares the crash rate for a given (attribute, factor) combination
+      against the overall baseline crash rate across all geocoded crashes and segments.
+      A rate_ratio > 1 means that factor is cited more often per segment than average
+      for that attribute value.
+    columns:
+      - name: attribute_name
+        description: The road characteristic being evaluated (bike_lane, speed_limit, road_class).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['bike_lane', 'speed_limit', 'road_class']
+      - name: attribute_value
+        description: The specific value of the road attribute (e.g. 'protected', '25', 'highway').
+        tests:
+          - not_null
+      - name: contributing_factor
+        description: The contributing factor being evaluated for this attribute value.
+        tests:
+          - not_null
+      - name: crash_count
+        description: Number of distinct crashes citing this factor on segments with this attribute value.
+        tests:
+          - not_null
+      - name: segment_count
+        description: Total number of segments in dim_street_segments with this attribute value. Used as the denominator for crash_rate.
+        tests:
+          - not_null
+      - name: crash_rate
+        description: crash_count / segment_count. Crashes per segment for this (attribute, factor) combination.
+        tests:
+          - not_null
+      - name: baseline_rate
+        description: Overall crash rate across all geocoded crashes and all segments. Same value on every row — used as the rate_ratio denominator.
+        tests:
+          - not_null
+      - name: rate_ratio
+        description: crash_rate / baseline_rate. Values above 1 indicate elevated crash frequency for this combination relative to the baseline.
+        tests:
+          - not_null
+
+  - name: rpt_dangerous_corridors
+    description: >
+      Ranks street segments by severity-weighted crash score. One row per
+      (segment, top_factor) — up to 3 rows per segment representing the top 3
+      contributing factors by crash count. Severity score is
+      (persons_killed * 5) + (persons_injured * 1). Property-only crashes
+      (severity_score = 0) are excluded. Order by total_severity_score DESC
+      to surface the most harmful segments first.
+    columns:
+      - name: segment_id
+        description: FK to dim_street_segments.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_street_segments')
+                field: segment_id
+      - name: full_street_name
+        description: Street name of the segment from dim_street_segments.
+        tests:
+          - not_null
+      - name: roadway_type
+        description: Road class of the segment.
+      - name: speed_limit
+        description: Posted speed limit of the segment in mph.
+      - name: bike_lane
+        description: Bike lane classification of the segment. Null if none.
+      - name: crash_count
+        description: Number of distinct crashes with severity_score > 0 on this segment.
+        tests:
+          - not_null
+      - name: total_severity_score
+        description: Sum of (persons_killed * 5) + (persons_injured * 1) across all non-property-only crashes on this segment.
+        tests:
+          - not_null
+      - name: factor_rank
+        description: Rank of this contributing factor within the segment by crash count. 1 = most cited.
+        tests:
+          - not_null
+      - name: contributing_factor
+        description: A top contributing factor for crashes on this segment.
+        tests:
+          - not_null
+      - name: factor_crash_count
+        description: Number of crashes on this segment that cited this contributing factor.
+        tests:
+          - not_null
